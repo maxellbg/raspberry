@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 import http.client
-import urllib, os, glob, time
+import urllib, urllib.parse, os, glob, time
 
 os.system('modprobe w1-gpio')
 os.system('modprobe w1-therm')
 base_dir = '/sys/bus/w1/devices/'
-device_id = ['28-3c01d607acbc', '28-3c01d607c17e', '28-3c01d6078f72', '28-3c01d607c885', '28-3c01d607ac28', '28-3c01d607ee38', '28-3c01d607990b' ]
+device_id = ['28-3c01d607acbc', '28-3c01d607c17e', '28-3c01d6078f72', '28-3c01d607c885', '28-3c01d607ac28', '28-3c01d607ee38', '28-3c01d607990b', '28-01204201b40a',  '28-012042f4bff0' ]
 
-temp=['u','u','u','u','u','u','u','u']
+temp=['u','u','u','u','u','u','u','u','u','u']
 
 def read_temp_raw():
     f = open(device_file, 'r')
@@ -41,8 +41,18 @@ s = soup.select("#wetterdaten > div > div > div:nth-child(1) >h4")
 s = str(s)
 s = (s.replace('[<h4>', ''))
 s = (s.replace('\n\t\t\t\t\t\t\t\t\t<span> °C</span>\n</h4>]', ''))
+temp[9] = float(s)
+print(temp)
 
-params = urllib.parse.urlencode({'key':'XXX', 'field1': temp[0], 'field2': temp[1], 'field3': temp[2], 'field4': temp[3], 'field5': temp[4], 'field6': temp[5], 'field7': temp[6], 'field8': s})
+params = urllib.parse.urlencode({'key':'0ED3HY9TYZ7M18EM', 'field1': temp[0], 'field2': temp[1], 'field3': temp[2], 'field4': temp[3], 'field5': temp[4], 'field6': temp[5], 'field7': temp[6], 'field8': temp[9]})
+headers = {"Content-type": "application/x-www-form-urlencoded","Accept": "text/plain"}
+conn = http.client.HTTPConnection("api.thingspeak.com:80")
+conn.request("POST", "/update", params, headers)
+response = conn.getresponse()
+print (response.status, response.reason)
+data = response.read()
+
+params = urllib.parse.urlencode({'key':'S2LNISW0QL9QCFAR', 'field1': temp[7], 'field2': temp[8]})
 headers = {"Content-type": "application/x-www-form-urlencoded","Accept": "text/plain"}
 conn = http.client.HTTPConnection("api.thingspeak.com:80")
 conn.request("POST", "/update", params, headers)
